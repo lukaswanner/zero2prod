@@ -15,6 +15,7 @@ path = "src/lib.rs"
 # If you want to manage multiple libraries in the same repository
 # have a look at the worksapce feature 
 [[bin]]
+path = "src/main.rs"
 name = "zero2prod"
 
 [dependencies]
@@ -23,3 +24,4 @@ reqwest = "0.11.16"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde = { version ="1", features= ["derive"] }
 sqlx = { version = "0.6", default-features = false, features = ["runtime-actix-rustls", "macros", "postgres", "uuid", "chrono", "migrate"] }
+config = { version = "0.13", default-features = false, features = ["yaml"] }

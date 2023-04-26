@@ -1,5 +1,6 @@
+use sqlx::{Connection, PgConnection};
 use std::net::TcpListener;
-use zero2prod::startup::run;
+use zero2prod::{configuration::get_configuration, startup::run};
 
 // Launch our application in the background
 fn spawn_app() -> String {
@@ -38,6 +39,13 @@ async fn health_check_works() {
 async fn subscribe_returns_a_200_for_valid_form_data() {
     // Arrange
     let app_address = spawn_app();
+    let config = get_configuration().expect("Failed to read config!");
+    let connection_string = config.database.connection_string();
+
+    let connection = PgConnection::connect(&connection_string)
+        .await
+        .expect("Failed to connect to Postgres.");
+
     let client = reqwest::Client::new();
 
     // Act
