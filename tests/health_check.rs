@@ -1,9 +1,11 @@
+use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
 use zero2prod::{
     configuration::{get_configuration, DatabaseSettings},
     startup::run,
+    telemetry::{get_subscriber, init_subscriber},
 };
 
 pub struct TestApp {
@@ -11,8 +13,15 @@ pub struct TestApp {
     pub db_pool: PgPool,
 }
 
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let subscriber = get_subscriber("test".into(), "debug".into());
+    init_subscriber(subscriber);
+});
+
 // Launch our application in the background
 async fn spawn_app() -> TestApp {
+    // initialise tracing stack
+    Lazy::force(&TRACING);
     // Launch the server as a background task
     // tokio::spawn returns a handle to the spawned future,
     // but we have no use for it here, hence the non-binding let
