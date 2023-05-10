@@ -10,6 +10,10 @@ RUN apt update && apt install lld clang -y
 
 # Copy all files from our working environment to our Docker image
 COPY . .
+
+# set SQLX_OFFLINE
+ENV SQLX_OFFLINE true
+
 # Let's build our binary!
 # We'll use the release profile to make it faaaaast
 RUN cargo build --release
