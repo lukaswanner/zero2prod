@@ -26,23 +26,12 @@ pub struct DatabaseSettings {
     pub port: u16,
     pub host: String,
     pub database_name: String,
-    pub require_sl: bool,
+    pub require_ssl: bool,
 }
 
 impl DatabaseSettings {
-    pub fn connection_string(&self) -> Secret<String> {
-        Secret::new(format!(
-            "postgres://{}:{}@{}:{}/{}",
-            self.username,
-            self.password.expose_secret(),
-            self.host,
-            self.port,
-            self.database_name
-        ))
-    }
-
     pub fn without_db(&self) -> PgConnectOptions {
-        let ssl_mode = if self.require_sl {
+        let ssl_mode = if self.require_ssl {
             PgSslMode::Require
         } else {
             PgSslMode::Prefer
@@ -60,16 +49,6 @@ impl DatabaseSettings {
         let mut options = self.without_db().database(&self.database_name);
         options.log_statements(tracing_log::log::LevelFilter::Trace);
         options
-    }
-
-    pub fn connection_string_without_db(&self) -> Secret<String> {
-        Secret::new(format!(
-            "postgres://{}:{}@{}:{}",
-            self.username,
-            self.password.expose_secret(),
-            self.host,
-            self.port
-        ))
     }
 }
 
