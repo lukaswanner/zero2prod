@@ -4,7 +4,7 @@ use secrecy::{ExposeSecret, Secret};
 
 pub struct EmailClient {
     http_client: Client,
-    base_url: reqwest::Url,
+    base_url: String,
     sender: SubscriberEmail,
     authorization_token: Secret<String>,
 }
@@ -17,7 +17,7 @@ impl EmailClient {
     ) -> Self {
         Self {
             http_client: Client::new(),
-            base_url: reqwest::Url::parse(&base_url).expect("Couldn't pass URL"),
+            base_url,
             sender,
             authorization_token,
         }
@@ -30,10 +30,8 @@ impl EmailClient {
         html_content: &str,
         text_content: &str,
     ) -> Result<(), reqwest::Error> {
-        let url = self
-            .base_url
-            .join("/email")
-            .expect("Failed to concat base url.");
+        let url = format!("{}/email", self.base_url);
+
         let request_body = SendEmailRequest {
             from: self.sender.as_ref().to_owned(),
             to: recipient.as_ref().to_owned(),
@@ -42,7 +40,7 @@ impl EmailClient {
             text_body: text_content.to_owned(),
         };
         self.http_client
-            .post(url.as_ref())
+            .post(url)
             .header(
                 "X-Postmark-Server-Token",
                 self.authorization_token.expose_secret(),
