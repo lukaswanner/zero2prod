@@ -44,14 +44,17 @@ async fn spawn_app() -> TestApp {
 
     let connection_pool = configure_database(&config.database).await;
 
+    let timeout = config.email_client.timeout();
     let sender_email = config
         .email_client
         .sender()
         .expect("Invalid sender email address.");
+
     let email_client = EmailClient::new(
         config.email_client.base_url,
         sender_email,
         config.email_client.authorization_token,
+        timeout,
     );
 
     let server =
