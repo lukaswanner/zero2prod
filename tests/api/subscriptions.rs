@@ -1,7 +1,6 @@
+use crate::helpers::spawn_app;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, ResponseTemplate};
-
-use crate::helpers::spawn_app;
 
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
@@ -16,13 +15,10 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
         .await;
 
     // Act
-    // form urlencoded link
-    let response = app.post_subscription(body.into()).await;
+    let response = app.post_subscriptions(body.into()).await;
 
     // Assert
     assert_eq!(200, response.status().as_u16());
-
-    // this will fail, since we dont have any rows yet!
 }
 
 #[tokio::test]
@@ -36,7 +32,7 @@ async fn subscriber_persists_the_new_subscriber() {
         .mount(&app.email_server)
         .await;
     // Act
-    app.post_subscription(body.into()).await;
+    app.post_subscriptions(body.into()).await;
 
     // Assert
     let saved = sqlx::query!("SELECT email, name, status FROM subscriptions")
@@ -63,7 +59,7 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
     for (invalid_body, error_message) in test_cases {
         // Act
         // form urlencoded link
-        let response = app.post_subscription(invalid_body.into()).await;
+        let response = app.post_subscriptions(invalid_body.into()).await;
 
         // Assert
         assert_eq!(
@@ -87,7 +83,7 @@ async fn subscribe_returns_a_400_when_fields_are_present_but_empty() {
 
     for (body, description) in test_cases {
         // Act
-        let response = app.post_subscription(body.into()).await;
+        let response = app.post_subscriptions(body.into()).await;
 
         // Assert
         assert_eq!(
@@ -113,7 +109,7 @@ async fn subscribe_sends_a_conformation_email_for_valid_data() {
         .await;
 
     // Act
-    app.post_subscription(body.into()).await;
+    app.post_subscriptions(body.into()).await;
 
     // Assert
     // Mock asserts
@@ -132,7 +128,7 @@ async fn subscriber_sends_a_confirmation_email_with_a_link() {
         .await;
 
     //Act
-    app.post_subscription(body.into()).await;
+    app.post_subscriptions(body.into()).await;
 
     // Assert
     // Get the first intercepted request

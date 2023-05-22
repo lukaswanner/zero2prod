@@ -25,10 +25,11 @@ pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
     pub email_server: MockServer,
+    pub port: u16,
 }
 
 impl TestApp {
-    pub async fn post_subscription(&self, body: String) -> reqwest::Response {
+    pub async fn post_subscriptions(&self, body: String) -> reqwest::Response {
         reqwest::Client::new()
             .post(&format!("{}/subscriptions", &self.address))
             .header("Content-Type", "application/x-www-form-urlencoded")
@@ -55,15 +56,18 @@ pub async fn spawn_app() -> TestApp {
 
     configure_database(&configuration.database).await;
 
+    // Launch the application as a background task
     let application = Application::build(configuration.clone())
         .await
         .expect("Failed to build application.");
     let address = format!("http://127.0.0.1:{}", application.port());
 
+    let application_port = application.port();
     let _ = tokio::spawn(application.run_until_stopped());
     // We return the application address to the caller!
     TestApp {
-        address,
+        address: format!("http://localhost:{}", application_port),
+        port: application_port,
         db_pool: get_connection_pool(&configuration.database),
         email_server,
     }
@@ -73,18 +77,16 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
     // Create database
     let mut connection = PgConnection::connect_with(&config.without_db())
         .await
-        .expect("Failed to connect to Postgres.");
-
+        .expect("Failed to connect to Postgres");
     connection
-        .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+        .execute(&*format!(r#"CREATE DATABASE "{}";"#, config.database_name))
         .await
-        .expect("Failed to create database");
+        .expect("Failed to create database.");
 
     // Migrate database
     let connection_pool = PgPool::connect_with(config.with_db())
         .await
         .expect("Failed to connect to Postgres.");
-
     sqlx::migrate!("./migrations")
         .run(&connection_pool)
         .await
