@@ -1,12 +1,30 @@
 use crate::domain::{NewSubscriber, SubscriberEmail, SubscriberName};
 use crate::email_client::EmailClient;
 use crate::startup::ApplicationBaseUrl;
+use actix_web::ResponseError;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
+
+// debug gives as much information as possible
+#[derive(Debug)]
+pub struct StoreTokenError(sqlx::Error);
+
+impl ResponseError for StoreTokenError {}
+
+// display gives a brief description (user facing)
+impl std::fmt::Display for StoreTokenError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "A database error was encoutered while \
+            trying to store a subscription token."
+        )
+    }
+}
 
 impl TryFrom<FormData> for NewSubscriber {
     type Error = String;
@@ -152,7 +170,7 @@ pub async fn store_token(
     transaction: &mut Transaction<'_, Postgres>,
     subscriber_id: Uuid,
     subscription_token: &str,
-) -> Result<(), sqlx::Error> {
+) -> Result<(), StoreTokenError> {
     sqlx::query!(
         r#"INSERT INTO subscription_tokens (subscription_token, subscriber_id)
         VALUES ($1, $2)"#,
@@ -163,7 +181,7 @@ pub async fn store_token(
     .await
     .map_err(|e| {
         tracing::error!("Failed to executre query: {:?}", e);
-        e
+        StoreTokenError(e)
     })?;
 
     Ok(())
