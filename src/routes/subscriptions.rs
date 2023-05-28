@@ -63,9 +63,9 @@ pub enum SubscribeError {
     ValidationError(String),
     StoreTokenError(StoreTokenError),
     SendEmailError(reqwest::Error),
-    PoolError(slqx::Error),
-    InsertSubscriberError(slqx::Error),
-    TransactionCommitError(slqx::Error),
+    PoolError(sqlx::Error),
+    InsertSubscriberError(sqlx::Error),
+    TransactionCommitError(sqlx::Error),
 }
 
 impl std::fmt::Debug for SubscribeError {
@@ -113,12 +113,6 @@ impl std::error::Error for SubscribeError {
 impl From<reqwest::Error> for SubscribeError {
     fn from(e: reqwest::Error) -> Self {
         Self::SendEmailError(e)
-    }
-}
-
-impl From<sqlx::Error> for SubscribeError {
-    fn from(e: sqlx::Error) -> Self {
-        Self::DatabaseError(e)
     }
 }
 
