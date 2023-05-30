@@ -54,6 +54,10 @@ rand = { version="0.8", features=["std_rng"] }
 # chapter 8 easier error displaying
 thiserror = "1"
 anyhow = "1"
+
+# chapter 9
+base64 = "0.21"
+
 [dev-dependencies]
 claims = "0.7"
 fake = "~2.3"

@@ -1,6 +1,8 @@
-use actix_web::{web, HttpResponse, ResponseError};
-use anyhow::Context;
+use actix_web::{http::header::HeaderMap, web, HttpRequest, HttpResponse, ResponseError};
+use anyhow::{Context, Ok};
+use base64::Engine;
 use reqwest::StatusCode;
+use secrecy::Secret;
 use sqlx::PgPool;
 
 use crate::{domain::SubscriberEmail, email_client::EmailClient};
@@ -46,7 +48,9 @@ pub async fn publish_newsletter(
     body: web::Json<BodyData>,
     pool: web::Data<PgPool>,
     email_client: web::Data<EmailClient>,
+    request: HttpRequest,
 ) -> Result<HttpResponse, PublishError> {
+    let _credentials = basic_authentication(request.headers());
     let subscribers = get_confirmed_subscribers(&pool).await?;
     for subscriber in subscribers {
         match subscriber {
@@ -96,4 +100,41 @@ async fn get_confirmed_subscribers(
     .collect();
 
     Ok(confirmed_subscribers)
+}
+
+struct Credentials {
+    username: String,
+    password: Secret<String>,
+}
+
+fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Error> {
+    let header_value = headers
+        .get("Authorization")
+        .context("The 'Authorization' header was missing")?
+        .to_str()
+        .context("The 'Authorization' header was not a valid UTF8 string")?;
+    let base64encoded_credentials = header_value
+        .strip_prefix("Basic ")
+        .context("The authorization scheme was not 'Basic'.")?;
+    let decoded_bytes = base64::engine::general_purpose::STANDARD
+        .decode(base64encoded_credentials)
+        .context("Failed to base64-decode 'Basic' credentials.")?;
+    let decoded_credentials = String::from_utf8(decoded_bytes)
+        .context("The decoded credential string is not valid UTF8.")?;
+
+    // split into two segemtns, using ':' as delimeter
+    let mut credentials = decoded_credentials.splitn(2, ":");
+    let username = credentials
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("A username must be provided in 'Basic' auth."))?
+        .to_string();
+    let password = credentials
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("A password must be provided in 'Basic' auth."))?
+        .to_string();
+
+    Ok(Credentials {
+        username,
+        password: Secret::new(password),
+    })
 }
