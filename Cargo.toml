@@ -51,6 +51,8 @@ reqwest = { version = "0.11", default-features = false, features = ["json", "rus
 # chapter 7 random for tokens
 rand = { version="0.8", features=["std_rng"] }
 
+# chapter 8 easier error displaying
+thiserror = "1"
 [dev-dependencies]
 claims = "0.7"
 fake = "~2.3"
