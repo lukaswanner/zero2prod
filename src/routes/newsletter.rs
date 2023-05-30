@@ -47,8 +47,8 @@ struct ConfirmedSubscriber {
 }
 
 struct Credentials {
-    _username: String,
-    _password: Secret<String>,
+    username: String,
+    password: Secret<String>,
 }
 
 fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Error> {
