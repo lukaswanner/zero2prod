@@ -1,7 +1,11 @@
 use crate::domain::SubscriberEmail;
 use crate::email_client::EmailClient;
 use crate::routes::error_chain_fmt;
-use actix_web::http::{header::HeaderMap, StatusCode};
+use actix_web::http::{
+    header,
+    header::{HeaderMap, HeaderValue},
+    StatusCode,
+};
 use actix_web::{web, HttpRequest, HttpResponse, ResponseError};
 use anyhow::Context;
 use base64::Engine;
@@ -23,10 +27,19 @@ impl std::fmt::Debug for PublishError {
 }
 
 impl ResponseError for PublishError {
-    fn status_code(&self) -> reqwest::StatusCode {
+    fn error_response(&self) -> HttpResponse {
         match self {
-            PublishError::UnexpectedError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            PublishError::AuthError(_) => StatusCode::UNAUTHORIZED,
+            PublishError::UnexpectedError(_) => {
+                HttpResponse::new(StatusCode::INTERNAL_SERVER_ERROR)
+            }
+            PublishError::AuthError(_) => {
+                let mut response = HttpResponse::new(StatusCode::UNAUTHORIZED);
+                let header_value = HeaderValue::from_str(r#"Basic realm="publish""#).unwrap();
+                response
+                    .headers_mut()
+                    .insert(header::WWW_AUTHENTICATE, header_value);
+                response
+            }
         }
     }
 }
