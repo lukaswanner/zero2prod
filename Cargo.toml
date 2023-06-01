@@ -58,6 +58,8 @@ anyhow = "1"
 # chapter 9
 base64 = "0.21"
 
+# chapter 10 -> hash function
+sha3 = "0.9"
 [dev-dependencies]
 claims = "0.7"
 fake = "~2.3"
