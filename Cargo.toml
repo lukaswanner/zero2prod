@@ -66,6 +66,8 @@ urlencoding = "2"
 htmlescape = "0.3"
 hmac = { version = "0.12", features = ["std"] }
 sha2 = "0.10"
+# chapter 10 decode hex 
+hex = "0.4"
 [dev-dependencies]
 claims = "0.7"
 fake = "~2.3"

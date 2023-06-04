@@ -101,7 +101,7 @@ pub fn run(
             .app_data(db_pool.clone())
             .app_data(email_client.clone())
             .app_data(base_url.clone())
-            .app_data(hmac_secret)
+            .app_data(hmac_secret.clone())
     })
     .listen(listener)?
     .run();
