@@ -1,7 +1,7 @@
 use crate::helpers::spawn_app;
 
 #[tokio::test]
-async fn an_erro_flash_message_is_set_on_failure() {
+async fn an_error_flash_message_is_set_on_failure() {
     // Arrange
     let app = spawn_app().await;
 
