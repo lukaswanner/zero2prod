@@ -7,7 +7,7 @@ async fn an_error_flash_message_is_set_on_failure() {
 
     // Act
     let login_body = serde_json::json!({
-      "username": "random-username"
+      "username": "random-username",
       "password": "random-password"
     });
     let response = app.post_login(&login_body).await;
