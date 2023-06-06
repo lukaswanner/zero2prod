@@ -86,7 +86,7 @@ pub fn run(
     let db_pool = Data::new(db_pool);
     let email_client = Data::new(email_client);
     let base_url = Data::new(ApplicationBaseUrl(base_url));
-    let hmac_secret = Data::new(HmacSecret(hmac_secret.clone()));
+    let hmac_secret = Data::new(HmacSecret(hmac_secret));
 
     let server = HttpServer::new(move || {
         App::new()
