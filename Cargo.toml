@@ -64,6 +64,7 @@ argon2 = { version="0.4", features = ["std"] }
 # chapter 10 -> urlencoding
 urlencoding = "2"
 htmlescape = "0.3"
+actix-web-flash-messages = { version = "0.4", features = ["cookies"] }
 
 [dev-dependencies]
 claims = "0.7"
@@ -74,5 +75,5 @@ tokio = { version = "1", features = ["rt", "macros"] }
 wiremock = "0.5"
 serde_json = "1"
 
-# chapter 7 scan text for links 
+# chapter 7 scan text for links
 linkify = "0.9"
