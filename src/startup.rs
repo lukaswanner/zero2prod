@@ -32,7 +32,7 @@ pub struct HmacSecret(pub Secret<String>);
 pub struct ApplicationBaseUrl(pub String);
 
 impl Application {
-    pub async fn build(configuration: Settings) -> Result<Self, std::io::Error> {
+    pub async fn build(configuration: Settings) -> Result<Self, anyhow::Error> {
         let connection_pool = get_connection_pool(&configuration.database);
 
         let sender_email = configuration
@@ -91,7 +91,7 @@ pub async fn run(
     base_url: String,
     hmac_secret: Secret<String>,
     redis_uri: Secret<String>,
-) -> Result<Server, std::io::Error> {
+) -> Result<Server, anyhow::Error> {
     let db_pool = Data::new(db_pool);
     let email_client = Data::new(email_client);
     let base_url = Data::new(ApplicationBaseUrl(base_url));
