@@ -100,6 +100,16 @@ impl TestApp {
             .await
             .expect("Failed to execute request.")
     }
+    pub async fn get_admin_newsletter(&self) -> reqwest::Response {
+        self.api_client
+            .get(&format!("{}/admin/newsletters", &self.address))
+            .send()
+            .await
+            .expect("Failed to execute request.")
+    }
+    pub async fn get_admin_newsletter_html(&self) -> String {
+        self.get_admin_newsletter().await.text().await.unwrap()
+    }
     pub async fn get_admin_dashboard(&self) -> reqwest::Response {
         self.api_client
             .get(&format!("{}/admin/dashboard", &self.address))
